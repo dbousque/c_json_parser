@@ -1,0 +1,15 @@
+{
+	"salut": "premiere valeur",
+	"salut2": "seconde valeur",
+	"une liste": [
+			"li1",
+			"li2"
+		],
+	"salut3": "avant-derniere valeur",
+	"salut4":
+		{
+			"lol1": "premlol",
+			"lol2": "deuxlol"
+		},
+	"salut5": "derniere valeur"
+}
