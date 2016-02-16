@@ -7,12 +7,11 @@
 # include "libdodo.h"
 
 # define BUFF_SIZE 1024
-# define INT 1
-# define LONG 2
-# define DOUBLE 3
-# define STRING 4
-# define DICT 5
-# define ARRAY 6
+# define LONG 1
+# define DOUBLE 2
+# define STRING 3
+# define DICT 4
+# define ARRAY 5
 
 typedef struct	s_value
 {
@@ -27,5 +26,6 @@ typedef struct	s_dict
 }				t_dict;
 
 t_value			*handle_buf(char *buf, int *i);
+t_value			*read_json(char *filename);
 
 #endif

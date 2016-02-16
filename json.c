@@ -410,15 +410,3 @@ t_value	*read_json(char *filename)
 	//print_json(json);
 	return (json);
 }
-
-int		main(int argc, char **argv)
-{
-	t_value	*json;
-
-	if (argc > 1)
-	{
-		json = read_json(argv[1]);
-		(void)json;
-	}
-	return (0);
-}
