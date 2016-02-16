@@ -42,6 +42,8 @@ SRC=get_next_line.c \
 	ft_strcmp.c \
 	ft_strncmp.c \
 	ft_atoi.c \
+	ft_atol.c \
+	ft_atod.c \
 	ft_isalpha.c \
 	ft_isdigit.c \
 	ft_isalnum.c \

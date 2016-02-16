@@ -235,6 +235,56 @@ t_value	*handle_array(char *buf, int *i)
 	return (values_list_to_array(values, nb));
 }
 
+char	is_digit(char c)
+{
+	if (c >= '0' && c <= '9')
+		return (1);
+	return (0);
+}
+
+t_value	*handle_number(char *buf, int *i)
+{
+	int		start;
+	char	floating_point;
+	char	*tmp;
+	t_value	*res;
+	long	res1;
+	double	res2;
+
+	if (!(res = (t_value*)malloc(sizeof(t_value))))
+		malloc_error();
+	floating_point = 0;
+	if (buf[*i] == '-')
+		(*i)++;
+	start = *i;
+	while (buf[*i] && (is_digit(buf[*i]) || buf[*i] == '.'))
+	{
+		if (buf[*i] == '.')
+			floating_point = 1;
+		(*i)++;
+	}
+	if (!(tmp = (char*)malloc(sizeof(char) * (*i - start + 1))))
+		malloc_error();
+	ft_strncpy(tmp, buf + start, *i - start);
+	if (!floating_point)
+	{
+		res1 = ft_atol(tmp);
+		if (!(res->data = (void*)malloc(sizeof(long))))
+			malloc_error();
+		*((long*)res->data) = res1;
+		res->type = LONG;
+		free(tmp);
+		return (res);
+	}
+	res2 = ft_atod(tmp);
+	if (!(res->data = (void*)malloc(sizeof(double))))
+		malloc_error();
+	*((double*)res->data) = res2;
+	res->type = DOUBLE;
+	free(tmp);
+	return (res);
+}
+
 t_value	*handle_buf(char *buf, int *i)
 {
 	while (buf[*i])
@@ -244,7 +294,9 @@ t_value	*handle_buf(char *buf, int *i)
 		if (buf[*i] == '"')
 			return (string_value(buf, i));
 		if (buf[*i] == '[')
-			return (handle_array(buf , i));
+			return (handle_array(buf, i));
+		if (is_digit(buf[*i]) || buf[*i] == '-')
+			return (handle_number(buf, i));
 		(*i)++;
 	}
 	return (void_value());
@@ -328,6 +380,16 @@ void	print_elt(t_value *elt, int nb_tabs)
 		ft_putstr((char*)elt->data);
 		ft_putchar('"');
 	}
+	else if (elt->type == LONG)
+	{
+		print_n_tabs(nb_tabs);
+		ft_printf("%ld", *((long*)elt->data));
+	}
+	else if (elt->type == DOUBLE)
+	{
+		print_n_tabs(nb_tabs);
+		ft_printf("%f", *((double*)elt->data));
+	}
 }
 
 void	print_json(t_value *json)
@@ -335,21 +397,28 @@ void	print_json(t_value *json)
 	print_elt(json, 0);
 }
 
-int		main(int argc, char **argv)
+t_value	*read_json(char *filename)
 {
-	char	*filename;
 	char	*buf;
 	t_value	*json;
 	int		i;
 
+	i = 0;
+	buf = read_whole_file(filename);
+	json = handle_buf(buf, &i);
+	free(buf);
+	//print_json(json);
+	return (json);
+}
+
+int		main(int argc, char **argv)
+{
+	t_value	*json;
+
 	if (argc > 1)
 	{
-		filename = argv[1];
-		i = 0;
-		buf = read_whole_file(filename);
-		json = handle_buf(buf, &i);
-		free(buf);
+		json = read_json(argv[1]);
+		(void)json;
 	}
-	print_json(json);
 	return (0);
 }

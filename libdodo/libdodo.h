@@ -89,6 +89,8 @@ void					ft_putstr(const char *s);
 int						ft_isascii(int c);
 size_t					ft_strlen(const char *s);
 int						ft_atoi(const char *str);
+long					ft_atol(const char *str);
+double					ft_atod(const char *str);
 char					*ft_strdup(const char *s1);
 char					*ft_strcpy(char *dst, const char *src);
 char					*ft_strncpy(char *dst, const char *src, size_t n);

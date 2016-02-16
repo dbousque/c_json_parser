@@ -3,7 +3,11 @@
 	"salut2": "seconde valeur",
 	"une liste": [
 			"li1",
-			"li2"
+			"li2",
+			23343534,
+			345646764444255647,
+			14.456,
+			"li3"
 		],
 	"salut3": "avant-derniere valeur",
 	"salut4":
