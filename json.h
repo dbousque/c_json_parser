@@ -27,6 +27,7 @@ typedef struct	s_dict
 }				t_dict;
 
 t_value			*read_json(char *filename);
+void			print_json(t_value *json);
 void			free_value(t_value *value);
 t_value			*handle_buf(char *buf, int *i);
 double			get_double(t_value *value);

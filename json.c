@@ -471,6 +471,8 @@ void	free_value(t_value *value)
 {
 	int		i;
 
+	if (value == (void*)DELETED_VALUE)
+		return ;
 	if (value->type == ARRAY)
 	{
 		i = 0;

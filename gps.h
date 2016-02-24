@@ -5,6 +5,8 @@
 
 # include "libdodo.h"
 # include "json.h"
+# include "quicksort.h"
+# include "linked_list.h"
 
 # define MOTORWAY 1
 # define MOTORWAY_LINK 2
@@ -24,19 +26,27 @@
 # define SERVICE_LINK 16
 # define LIVING_STREET 17
 
+typedef struct s_way t_way;
+
 typedef struct		s_node
 {
 	long			id;
 	double			lat;
 	double			lon;
+	char			nb_inter;
+	t_linked_list	*tmp_ways;
+	t_way			**ways;
 }					t_node;
 
 typedef struct		s_way
 {
 	t_node			**nodes;
+	short			nodes_len;
 	unsigned char	maxspeed;
 	char			oneway;
 	char			type;
 }					t_way;
+
+t_node				*find_node_by_id(t_node **nodes, int nb_nodes, long id);
 
 #endif
