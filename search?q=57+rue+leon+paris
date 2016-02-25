@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>OpenStreetMap Nominatim: Search</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<base href="http://nominatim.openstreetmap.org/" />
+	<link href="nominatim.xml" rel="search" title="Nominatim Search" type="application/opensearchdescription+xml" />
+	<link href="css/leaflet.css" rel="stylesheet" />
+	<link href="css/bootstrap-theme.min.css" rel="stylesheet" />
+	<link href="css/bootstrap.min.css" rel="stylesheet" />
+	<link href="css/common.css" rel="stylesheet" type="text/css" />
+	<link href="css/search.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body id="search-page">
+
+	  <header class="container-fluid">
+    <div class="row">
+      <div class="col-xs-4">
+        <div class="brand">
+          <a href="http://nominatim.openstreetmap.org/">
+          <img alt="logo" src="images/osm_logo.120px.png" width="30" height="30"/>
+          <h1>Nominatim</h1>
+          </a>
+        </div>
+      </div>
+      <div id="last-updated" class="col-xs-4 text-center">
+                  Data last updated:
+          <br>
+          2016/02/24 23:29 GMT              </div>
+      <div class="col-xs-4 text-right">
+        <div class="btn-group">
+          <button class="dropdown-toggle btn btn-sm btn-default" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+            About &amp; Help <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-right">
+            <li><a href="http://wiki.openstreetmap.org/wiki/Nominatim" target="_blank">Documentation</a></li>
+            <li><a href="http://wiki.openstreetmap.org/wiki/Nominatim/FAQ" target="_blank">FAQ</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="#" class="" data-toggle="modal" data-target="#report-modal">Report problem with results</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="modal fade" id="report-modal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title">Report a problem</h4>
+        </div>
+        <div class="modal-body">
+          <p>
+	Before reporting problems please read the <a target="_blank" href="http://wiki.openstreetmap.org/wiki/Nominatim">user documentation</a>
+	and
+	<a target="_blank" href="http://wiki.openstreetmap.org/wiki/Nominatim/FAQ">FAQ</a>.
+
+	If your problem relates to the address of a particular search result please use the 'details' link 
+	to check how the address was generated before reporting a problem.
+</p>
+<p>
+	Use <a target="_blank" href="https://github.com/twain47/nominatim/issues">Nominatim issues on github</a>
+	to report problems.
+<!-- 	You can search for existing bug reports
+	<a href="http://trac.openstreetmap.org/query?status=new&amp;status=assigned&amp;status=reopened&amp;component=nominatim&amp;order=priority">here</a>.</p>
+ -->
+</p>
+<p>
+	Please ensure that you include a full description of the problem, including the search
+	query that you used, the problem with the result and, if the problem relates to missing data,
+	the osm type (node, way, relation) and id of the item that is missing.
+</p>
+<p>
+	Problems that contain enough detail are likely to get looked at before ones that require
+	significant research.
+</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+	<form class="form-inline" role="search" accept-charset="UTF-8" action="http://nominatim.openstreetmap.org/search.php">
+		<div class="form-group">
+			<input id="q" name="q" type="text" class="form-control input-sm" placeholder="Search" value="57 rue leon paris" >
+		</div>
+		<div class="form-group search-button-group">
+			<button type="submit" class="btn btn-primary btn-sm">Search</button>
+							<!-- <input type="checkbox" value="1" name="polygon" /> Highlight -->
+				<input type="hidden" value="1" name="polygon" />
+						<input type="hidden" name="viewbox" value="" />
+			<div class="checkbox-inline">
+				<label>
+					<input type="checkbox" id="use_viewbox" >
+					apply viewbox
+				</label>
+			</div>
+		</div>
+		<div class="search-type-link">
+			<a href="http://nominatim.openstreetmap.org/reverse.php?format=html">reverse search</a>
+		</div>
+	</form>
+
+
+	<div id="content">
+
+
+		<div id="searchresults" class="sidebar">
+		<div class="result" data-position=0> <span class="name">57, Rue Léon, La Goutte d'Or, Goutte-d'Or, 18e, Paris, Île-de-France, France métropolitaine, 75018, France</span> <span class="type">(House)</span> <a class="btn btn-default btn-xs details" href="details.php?place_id=15930536">details</a></div><div class="result" data-position=1> <span class="name">Paris, León, Guanajuato, 37000, Estados Unidos Mexicanos</span> <span class="type">(Residential)</span> <a class="btn btn-default btn-xs details" href="details.php?place_id=65212859">details</a></div><div class="result" data-position=2> <span class="name">Paris, Monterrey, Nuevo León, 6400, Estados Unidos Mexicanos</span> <span class="type">(Residential)</span> <a class="btn btn-default btn-xs details" href="details.php?place_id=67440331">details</a></div><div class="result" data-position=3> <span class="name">Paris, Progressive 9 BF Topman Homes, Molino, South Susana Homes, Bacoor, Cavite, Calabarzon, 4102, Philippines</span> <span class="type">(Residential)</span> <a class="btn btn-default btn-xs details" href="details.php?place_id=53041487">details</a></div><div class="result" data-position=4> <span class="name">Paris, Jardines de Linda Vista, Guadalupe, Nuevo León, 64590, Estados Unidos Mexicanos</span> <span class="type">(Residential)</span> <a class="btn btn-default btn-xs details" href="details.php?place_id=80374214">details</a></div><div class="result" data-position=5> <span class="name">Paris, Apodaca, Nuevo León, 66634, Estados Unidos Mexicanos</span> <span class="type">(Residential)</span> <a class="btn btn-default btn-xs details" href="details.php?place_id=102099122">details</a></div><div class="result" data-position=6> <span class="name">Paris, San Nicolás de los Garza, Nuevo León, 66480, Estados Unidos Mexicanos</span> <span class="type">(Residential)</span> <a class="btn btn-default btn-xs details" href="details.php?place_id=112423302">details</a></div><div class="result" data-position=7> <span class="name">Paris, Riberas de San Nicolás, San Nicolás de los Garza, Nuevo León, 66460, Estados Unidos Mexicanos</span> <span class="type">(Residential)</span> <a class="btn btn-default btn-xs details" href="details.php?place_id=94780289">details</a></div><div class="result" data-position=8> <span class="name">Paris, San Sebastian, Guadalupe, Nuevo León, 67180, Estados Unidos Mexicanos</span> <span class="type">(Residential)</span> <a class="btn btn-default btn-xs details" href="details.php?place_id=98893710">details</a></div><div class="result" data-position=9> <span class="name">Paris, Tacubaya, Guadalupe, Nuevo León, 67180, Estados Unidos Mexicanos</span> <span class="type">(Residential)</span> <a class="btn btn-default btn-xs details" href="details.php?place_id=98561435">details</a></div><div class="more"><a class="btn btn-primary" href="http://nominatim.openstreetmap.org/search.php?format=html&amp;exclude_place_ids=15930536,65212859,67440331,53041487,80374214,102099122,112423302,94780289,98893710,98561435&amp;q=57+rue+leon+paris">Search for more results</a></div>		</div>
+
+
+		<div id="map-wrapper">
+			<div id="map-position"></div>
+			<div id="map"></div>
+		</div>
+
+	</div> <!-- /content -->
+
+
+
+
+
+
+
+	<script type="text/javascript">
+	var nominatim_map_init = {
+    "zoom": 2,
+    "lat": 20,
+    "lon": 0,
+    "tile_url": "http:\/\/{s}.tile.osm.org\/{z}\/{x}\/{y}.png",
+    "tile_attribution": ""
+};var nominatim_results = [
+    {
+        "osm_type": "N",
+        "osm_id": "1602665947",
+        "class": "place",
+        "type": "house",
+        "admin_level": "15",
+        "rank_search": "30",
+        "rank_address": "30",
+        "place_id": "15930536",
+        "parent_place_id": "112933235",
+        "country_code": "fr",
+        "langaddress": "57, Rue L\u00e9on, La Goutte d'Or, Goutte-d'Or, 18e, Paris, \u00cele-de-France, France m\u00e9tropolitaine, 75018, France",
+        "placename": null,
+        "ref": null,
+        "lon": "2.3532563",
+        "lat": "48.8902555",
+        "importance": 0.201,
+        "addressimportance": "15.6408227877943",
+        "extra_place": null,
+        "aBoundingBox": [
+            "48.8902055",
+            "48.8903055",
+            "2.3532063",
+            "2.3533063"
+        ],
+        "label": "House",
+        "name": "57, Rue L\u00e9on, La Goutte d'Or, Goutte-d'Or, 18e, Paris, \u00cele-de-France, France m\u00e9tropolitaine, 75018, France",
+        "foundorder": -2.5481822787794
+    },
+    {
+        "osm_type": "W",
+        "osm_id": "31358798",
+        "class": "highway",
+        "type": "residential",
+        "admin_level": "15",
+        "rank_search": "26",
+        "rank_address": "26",
+        "place_id": "65212859",
+        "parent_place_id": "779840",
+        "country_code": "mx",
+        "langaddress": "Paris, Le\u00f3n, Guanajuato, 37000, Estados Unidos Mexicanos",
+        "placename": "Paris",
+        "ref": "Paris",
+        "lon": "-101.6718009",
+        "lat": "21.1143373",
+        "importance": 0.2,
+        "addressimportance": "7.50882503355697",
+        "extra_place": null,
+        "aBoundingBox": [
+            "21.1113274",
+            "21.1168201",
+            "-101.6740213",
+            "-101.6704276"
+        ],
+        "label": "Residential",
+        "name": "Paris, Le\u00f3n, Guanajuato, 37000, Estados Unidos Mexicanos",
+        "foundorder": -1.7475825033557
+    },
+    {
+        "osm_type": "W",
+        "osm_id": "30986527",
+        "class": "highway",
+        "type": "residential",
+        "admin_level": "15",
+        "rank_search": "26",
+        "rank_address": "26",
+        "place_id": "67440331",
+        "parent_place_id": "661300",
+        "country_code": "mx",
+        "langaddress": "Paris, Monterrey, Nuevo Le\u00f3n, 6400, Estados Unidos Mexicanos",
+        "placename": "Paris",
+        "ref": "Paris",
+        "lon": "-100.3291966",
+        "lat": "25.6687467",
+        "importance": 0.2,
+        "addressimportance": "10.7026437496813",
+        "extra_place": null,
+        "aBoundingBox": [
+            "25.6686914",
+            "25.6688455",
+            "-100.3301186",
+            "-100.3286804"
+        ],
+        "label": "Residential",
+        "name": "Paris, Monterrey, Nuevo Le\u00f3n, 6400, Estados Unidos Mexicanos",
+        "foundorder": -1.0669643749681
+    },
+    {
+        "osm_type": "W",
+        "osm_id": "5132718",
+        "class": "highway",
+        "type": "residential",
+        "admin_level": "15",
+        "rank_search": "26",
+        "rank_address": "26",
+        "place_id": "53041487",
+        "parent_place_id": "5945444",
+        "country_code": "ph",
+        "langaddress": "Paris, Progressive 9 BF Topman Homes, Molino, South Susana Homes, Bacoor, Cavite, Calabarzon, 4102, Philippines",
+        "placename": "Paris",
+        "ref": "Paris",
+        "lon": "120.9753933",
+        "lat": "14.4142859",
+        "importance": 0.2,
+        "addressimportance": "5.18881003412009",
+        "extra_place": null,
+        "aBoundingBox": [
+            "14.4135291",
+            "14.4142859",
+            "120.9753306",
+            "120.9753933"
+        ],
+        "label": "Residential",
+        "name": "Paris, Progressive 9 BF Topman Homes, Molino, South Susana Homes, Bacoor, Cavite, Calabarzon, 4102, Philippines",
+        "foundorder": -0.51558100341201
+    },
+    {
+        "osm_type": "W",
+        "osm_id": "98674466",
+        "class": "highway",
+        "type": "residential",
+        "admin_level": "15",
+        "rank_search": "26",
+        "rank_address": "26",
+        "place_id": "80374214",
+        "parent_place_id": "97098008",
+        "country_code": "mx",
+        "langaddress": "Paris, Jardines de Linda Vista, Guadalupe, Nuevo Le\u00f3n, 64590, Estados Unidos Mexicanos",
+        "placename": "Paris",
+        "ref": "Paris",
+        "lon": "-100.2580762",
+        "lat": "25.6867029",
+        "importance": 0.2,
+        "addressimportance": "5.05521140824365",
+        "extra_place": null,
+        "aBoundingBox": [
+            "25.6857469",
+            "25.6869723",
+            "-100.2581409",
+            "-100.2571408"
+        ],
+        "label": "Residential",
+        "name": "Paris, Jardines de Linda Vista, Guadalupe, Nuevo Le\u00f3n, 64590, Estados Unidos Mexicanos",
+        "foundorder": -0.50222114082437
+    },
+    {
+        "osm_type": "W",
+        "osm_id": "171469278",
+        "class": "highway",
+        "type": "residential",
+        "admin_level": "15",
+        "rank_search": "26",
+        "rank_address": "26",
+        "place_id": "102099122",
+        "parent_place_id": "10822990",
+        "country_code": "mx",
+        "langaddress": "Paris, Apodaca, Nuevo Le\u00f3n, 66634, Estados Unidos Mexicanos",
+        "placename": "Paris",
+        "ref": "Paris",
+        "lon": "-100.1951079",
+        "lat": "25.7462959",
+        "importance": 0.2,
+        "addressimportance": "5.05521140824365",
+        "extra_place": null,
+        "aBoundingBox": [
+            "25.7461294",
+            "25.7464628",
+            "-100.1961762",
+            "-100.1942075"
+        ],
+        "label": "Residential",
+        "name": "Paris, Apodaca, Nuevo Le\u00f3n, 66634, Estados Unidos Mexicanos",
+        "foundorder": -0.50222114082437
+    },
+    {
+        "osm_type": "W",
+        "osm_id": "225711004",
+        "class": "highway",
+        "type": "residential",
+        "admin_level": "15",
+        "rank_search": "26",
+        "rank_address": "26",
+        "place_id": "112423302",
+        "parent_place_id": "10964828",
+        "country_code": "mx",
+        "langaddress": "Paris, San Nicol\u00e1s de los Garza, Nuevo Le\u00f3n, 66480, Estados Unidos Mexicanos",
+        "placename": "Paris",
+        "ref": "Paris",
+        "lon": "-100.2765769",
+        "lat": "25.7143015",
+        "importance": 0.2,
+        "addressimportance": "5.05521140824365",
+        "extra_place": null,
+        "aBoundingBox": [
+            "25.7126243",
+            "25.7158572",
+            "-100.2773254",
+            "-100.2757293"
+        ],
+        "label": "Residential",
+        "name": "Paris, San Nicol\u00e1s de los Garza, Nuevo Le\u00f3n, 66480, Estados Unidos Mexicanos",
+        "foundorder": -0.50222114082437
+    },
+    {
+        "osm_type": "W",
+        "osm_id": "156272432",
+        "class": "highway",
+        "type": "residential",
+        "admin_level": "15",
+        "rank_search": "26",
+        "rank_address": "26",
+        "place_id": "94780289",
+        "parent_place_id": "2601372303",
+        "country_code": "mx",
+        "langaddress": "Paris, Riberas de San Nicol\u00e1s, San Nicol\u00e1s de los Garza, Nuevo Le\u00f3n, 66460, Estados Unidos Mexicanos",
+        "placename": "Paris",
+        "ref": "Paris",
+        "lon": "-100.2780659",
+        "lat": "25.7518685",
+        "importance": 0.2,
+        "addressimportance": "5.05521140824365",
+        "extra_place": null,
+        "aBoundingBox": [
+            "25.7518685",
+            "25.7519607",
+            "-100.2786377",
+            "-100.2780659"
+        ],
+        "label": "Residential",
+        "name": "Paris, Riberas de San Nicol\u00e1s, San Nicol\u00e1s de los Garza, Nuevo Le\u00f3n, 66460, Estados Unidos Mexicanos",
+        "foundorder": -0.50222114082437
+    },
+    {
+        "osm_type": "W",
+        "osm_id": "161684979",
+        "class": "highway",
+        "type": "residential",
+        "admin_level": "15",
+        "rank_search": "26",
+        "rank_address": "26",
+        "place_id": "98893710",
+        "parent_place_id": "99499498",
+        "country_code": "mx",
+        "langaddress": "Paris, San Sebastian, Guadalupe, Nuevo Le\u00f3n, 67180, Estados Unidos Mexicanos",
+        "placename": "Paris",
+        "ref": "Paris",
+        "lon": "-100.2050015",
+        "lat": "25.6660796",
+        "importance": 0.2,
+        "addressimportance": "5.05521140824365",
+        "extra_place": null,
+        "aBoundingBox": [
+            "25.6660508",
+            "25.6663742",
+            "-100.2063074",
+            "-100.2048138"
+        ],
+        "label": "Residential",
+        "name": "Paris, San Sebastian, Guadalupe, Nuevo Le\u00f3n, 67180, Estados Unidos Mexicanos",
+        "foundorder": -0.50222114082437
+    },
+    {
+        "osm_type": "W",
+        "osm_id": "161684958",
+        "class": "highway",
+        "type": "residential",
+        "admin_level": "15",
+        "rank_search": "26",
+        "rank_address": "26",
+        "place_id": "98561435",
+        "parent_place_id": "96494450",
+        "country_code": "mx",
+        "langaddress": "Paris, Tacubaya, Guadalupe, Nuevo Le\u00f3n, 67180, Estados Unidos Mexicanos",
+        "placename": "Paris",
+        "ref": "Paris",
+        "lon": "-100.2029193",
+        "lat": "25.665816",
+        "importance": 0.2,
+        "addressimportance": "5.05521140824365",
+        "extra_place": null,
+        "aBoundingBox": [
+            "25.6655916",
+            "25.6659616",
+            "-100.2036366",
+            "-100.2019337"
+        ],
+        "label": "Residential",
+        "name": "Paris, Tacubaya, Guadalupe, Nuevo Le\u00f3n, 67180, Estados Unidos Mexicanos",
+        "foundorder": -0.50222114082437
+    }
+];	</script>
+	<footer>
+  <p class="disclaimer">
+    Addresses and postcodes are approximate
+  </p>
+  <p class="copyright">
+    &copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors
+  </p>
+</footer>
+
+<script src="js/jquery.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/leaflet.min.js"></script>
+<script src="js/leaflet-omnivore.min.js"></script>
+<script src="js/nominatim-ui.js"></script>
+
+</body>
+</html>

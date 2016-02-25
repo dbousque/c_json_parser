@@ -21,6 +21,12 @@ t_linked_list	*new_list(void)
 	return (res);
 }
 
+void	free_list(t_linked_list *list)
+{
+	free(list->elts);
+	free(list);
+}
+
 void	double_list_size(t_linked_list *list)
 {
 	void	**new_elts;

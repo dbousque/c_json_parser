@@ -266,6 +266,7 @@ t_value	*handle_number(char *buf, int *i)
 	}
 	if (!(tmp = (char*)malloc(sizeof(char) * (*i - start + 1))))
 		malloc_error();
+	tmp[*i - start] = '\0';
 	ft_strncpy(tmp, buf + start, *i - start);
 	if (!floating_point)
 	{
@@ -508,5 +509,15 @@ t_value	*read_json(char *filename)
 	buf = read_whole_file(filename);
 	json = handle_buf(buf, &i);
 	free(buf);
+	return (json);
+}
+
+t_value	*read_json_str(char *content)
+{
+	t_value	*json;
+	int		i;
+
+	i = 0;
+	json = handle_buf(content, &i);
 	return (json);
 }

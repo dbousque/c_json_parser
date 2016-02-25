@@ -37,5 +37,6 @@ t_value			*get_val(t_value *dict_inp, char *key);
 t_value			*get(t_value *array, int i);
 t_value			**get_tab(t_value *value);
 t_dict			*get_dict(t_value *dict_val);
+t_value			*read_json_str(char *content);
 
 #endif

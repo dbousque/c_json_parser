@@ -7,7 +7,9 @@
 # include "json.h"
 # include "quicksort.h"
 # include "linked_list.h"
+# include <math.h>
 
+# define PI 3.14159265359
 # define MOTORWAY 1
 # define MOTORWAY_LINK 2
 # define TRUNK 3
@@ -45,8 +47,16 @@ typedef struct		s_way
 	unsigned char	maxspeed;
 	char			oneway;
 	char			type;
+	char			access;
 }					t_way;
 
 t_node				*find_node_by_id(t_node **nodes, int nb_nodes, long id);
+t_node				**get_nodes(t_value *json);
+int					get_nb_nodes(t_node **nodes);
+t_list				*get_ways(t_value *json, t_node **nodes, int nb_nodes);
+t_way				**resolve_ways(t_list *tmp_ways);
+void				validate_nodes(t_node **nodes);
+char				*get_type_name(char type);
+void				write_ways_to_file(t_way **ways, char *filename);
 
 #endif
