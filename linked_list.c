@@ -21,6 +21,23 @@ t_linked_list	*new_list(void)
 	return (res);
 }
 
+void	**list_to_array(t_linked_list *list)
+{
+	void	**res;
+	int		i;
+
+	if (!(res = (void**)malloc(sizeof(void*) * (list->len + 1))))
+		malloc_error();
+	res[list->len] = NULL;
+	i = 0;
+	while (i < list->len)
+	{
+		res[i] = list->elts[i];
+		i++;
+	}
+	return (res);
+}
+
 void	free_list(t_linked_list *list)
 {
 	free(list->elts);
@@ -58,29 +75,3 @@ void	list_add(t_linked_list *list, void *elt)
 	list->elts[list->len] = elt;
 	list->len++;
 }
-
-/*int		main(void)
-{
-	t_linked_list	*list;
-	int				*tmp;
-	int				i;
-	char			tmp_char;
-
-	list = new_list();
-	i = 0;
-	while (i < 10)
-	{
-		tmp = (int*)malloc(sizeof(int));
-		*tmp = i;
-		list_add(list, tmp);
-		i++;
-	}
-	i = 0;
-	while (i < list->len)
-	{
-		tmp_char = *((int*)list->elts[i]) + '0';
-		write(1, &tmp_char, 1);
-		i++;
-	}
-	return (0);
-}*/

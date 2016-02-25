@@ -16,5 +16,6 @@ typedef struct	s_linked_list
 t_linked_list	*new_list(void);
 void			list_add(t_linked_list *list, void *elt);
 void			free_list(t_linked_list *list);
+void			**list_to_array(t_linked_list *list);
 
 #endif

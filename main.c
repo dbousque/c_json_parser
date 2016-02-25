@@ -2,6 +2,13 @@
 
 #include "gps.h"
 
+static void	malloc_error(void)
+{
+	int i = write(2, "Could not allocate enough memory.\n", 34);
+	(void)i;
+	exit(1);
+}
+
 int		compare_nodes(void *node1, void *node2)
 {
 	if (((t_node*)node1)->id > ((t_node*)node2)->id)
@@ -91,6 +98,11 @@ double	get_distance(double lon1, double lat1, double lon2, double lat2)
 	return (dist);
 }
 
+double	get_distance_node(t_node *node1, t_node *node2)
+{
+	return (get_distance(node1->lon, node1->lat, node2->lon, node2->lat));
+}
+
 t_node	*find_closest_node(t_node **nodes, double lon, double lat)
 {
 	double	closest_distance;
@@ -131,6 +143,138 @@ t_node	*get_node_from_adress(t_node **nodes)
 	return (find_closest_node(nodes, lon, lat));
 }
 
+t_node2	*new_searchnode(t_node2 *from_node, t_node *to_node, t_node *end_node)
+{
+	t_node2	*res;
+
+	if (!(res = (t_node2*)malloc(sizeof(t_node2))))
+		malloc_error();
+	res->last_node = to_node;
+	res->distance_from_start = from_node->distance_from_start + get_distance_node(from_node->last_node, to_node);
+	res->priority = (-res->distance_from_start + get_distance_node(to_node, end_node));
+	res->previous_node = from_node->last_node;
+	return (res);
+}
+
+/* 
+	WAAARRNNINNGGG !!!! res->priority should be changed in the following function too
+	if we want another priority function (I know, bad design)
+*/
+
+t_node2	*new_searchnode_void(t_node *start, t_node *end, t_node *end_node)
+{
+	t_node2	*res;
+
+	if (!(res = (t_node2*)malloc(sizeof(t_node2))))
+		malloc_error();
+	res->last_node = end;
+	res->distance_from_start = get_distance_node(start, end);
+	res->priority = (-res->distance_from_start + get_distance_node(end, end_node));
+	res->previous_node = start;
+	return (res);
+}
+
+t_node	*way_end(t_way *way, t_node *start_node)
+{
+	if (way->nodes[0] == start_node)
+		return (way->nodes[way->nodes_len - 1]);
+	return (way->nodes[0]);
+}
+
+void	add_start_nodes(t_tree *tree, t_node *start_node, t_node *end_node)
+{
+	int		i;
+
+	i = 0;
+	start_node->distance_from_start = 0.0;
+	while (start_node->ways[i])
+	{
+		ft_add_to_tree2(tree, new_searchnode_void(start_node, way_end(start_node->ways[i], start_node), end_node));
+		i++;
+	}
+}
+
+void	print_best_way(t_node *start_node, t_node *end_node, clock_t start_time)
+{
+	t_node			*closest_to_start;
+	t_way			*best_way;
+	t_node 			*current;
+	int				i;
+	t_linked_list	*ways;
+
+	ways = new_list();
+	current = end_node;
+	while (1)
+	{
+		i = 0;
+		best_way = NULL;
+		closest_to_start = NULL;
+		while (current->ways[i])
+		{
+			if (way_end(current->ways[i], current) == current->previous_node)
+			{
+				best_way = current->ways[i];
+				closest_to_start = way_end(current->ways[i], current);
+				break ;
+			}
+			i++;
+		}
+		if (!best_way || !closest_to_start)
+			ft_printf("EEERRRORRR\n");
+		list_add(ways, (void*)best_way);
+		if (closest_to_start == start_node)
+			break ;
+		current = closest_to_start;
+	}
+	ft_printf("Found best way in %.3f seconds !\nDistance : %.1fkm\n", (float)(clock() - start_time) / CLOCKS_PER_SEC, end_node->distance_from_start);
+	write_ways_to_file((t_way**)list_to_array(ways), "shapefiles/test_chemin8.ways");
+}
+
+void	free_searchnode(t_node2 *node)
+{
+	free(node);
+}
+
+void	find_best_way(t_node *start_node, t_node *end_node)
+{
+	t_tree	*tree;
+	t_node2	*top_node;
+	int		i;
+	clock_t	start_time;
+	int		nb_nodes;
+
+	nb_nodes = 0;
+	start_time = clock();
+	tree = ft_empty_tree();
+	add_start_nodes(tree, start_node, end_node);
+	while (!is_tree_empty(tree))
+	{
+		top_node = pop(tree);
+		if (tree->last > nb_nodes)
+			nb_nodes = tree->last;
+		if (top_node->last_node->distance_from_start != -1.0)
+			free_searchnode(top_node);
+		else
+		{
+			top_node->last_node->distance_from_start = top_node->distance_from_start;
+			top_node->last_node->previous_node = top_node->previous_node;
+			if (top_node->last_node == end_node)
+			{
+				ft_printf("highest number of nodes : %d\n", nb_nodes);
+				print_best_way(start_node, end_node, start_time);
+				return ;
+			}
+			i = 0;
+			while (top_node->last_node->ways[i])
+			{
+				if (way_end(top_node->last_node->ways[i], top_node->last_node)->distance_from_start == -1.0)
+					ft_add_to_tree2(tree, new_searchnode(top_node, way_end(top_node->last_node->ways[i], top_node->last_node), end_node));
+				i++;
+			}
+		}
+	}
+}
+
 int		main(int argc, char **argv)
 {
 	t_node	**nodes;
@@ -143,12 +287,12 @@ int		main(int argc, char **argv)
 	if (argc > 1)
 	{
 		read_ways_n_nodes(argv[1], &nodes, &ways);
-		write_ways_to_file(ways, "shapefiles/all_ways.ways");
+		write_ways_to_file(ways, "shapefiles/all_ways3.ways");
 		start_node = get_node_from_adress(nodes);
 		end_node = get_node_from_adress(nodes);
 		(void)start_node;
 		(void)end_node;
-		ft_printf("node lat lon : %f, %f\n", start_node->lon, start_node->lat);
+		find_best_way(start_node, end_node);
 	}
 	return (0);
 }

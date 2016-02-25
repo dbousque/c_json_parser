@@ -36,6 +36,8 @@ t_node	*new_node(long id, double lat, double lon)
 	res->ways = NULL;
 	res->tmp_ways = NULL;
 	res->nb_inter = 0;
+	res->distance_from_start = -1.0;
+	res->previous_node = NULL;
 	return (res);
 }
 
