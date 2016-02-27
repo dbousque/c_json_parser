@@ -2,11 +2,20 @@
 
 #include "gps.h"
 
+//for fopen()
+#include <stdio.h>
+
 static void	malloc_error(void)
 {
 	int i = write(2, "Could not allocate enough memory.\n", 34);
 	(void)i;
 	exit(1);
+}
+
+static void	open_failed(void)
+{
+	ft_putendl_fd("Could not read file.", 2);
+	exit(0);
 }
 
 int		compare_nodes(void *node1, void *node2)
@@ -38,7 +47,7 @@ char	*read_whole_file2(char *filename)
 {
 	char	*res;
 	char	buf[1024];
-	int		size;
+	long	size;
 	int		ret;
 	int		fd;
 
@@ -48,11 +57,58 @@ char	*read_whole_file2(char *filename)
 		size += ret;
 	close(fd);
 	fd = open(filename, O_RDONLY);
-	res = (char*)malloc(sizeof(char) * (size + 1));
+	ft_printf("size : %ld\n", size);
+	if (!(res = (char*)malloc(sizeof(char) * (size + 1))))
+		malloc_error();
 	read(fd, res, size);
 	res[size] = '\0';
+	close(fd);
 	return (res);
 }
+
+char	*read_whole_file3(char *filename)
+{
+	char			buf[BUFF_SIZE];
+	int				fd;
+	int				ret;
+	long			current_length;
+	char			*res;
+	long			total_length;
+
+	fd = open(filename, O_RDONLY);
+	if (fd < 0)
+		open_failed();
+	total_length = 0;
+	while ((ret = read(fd, buf, BUFF_SIZE)) > 0)
+		total_length += ret;
+	if (ret < 0)
+	{
+		ft_printf("ERROR WHILE READING FILE\n");
+		exit(0);
+	}
+	close(fd);
+	if (!(res = (char*)malloc(sizeof(char) * (total_length + 1))))
+		malloc_error();
+	res[total_length] = '\0';
+	current_length = 0;
+	fd = open(filename, O_RDONLY);
+	if (fd < 0)
+		open_failed();
+	while ((ret = read(fd, res + current_length, BUFF_SIZE)) > 0)
+		current_length += ret;
+	if (ret < 0)
+	{
+		ft_printf("ERROR WHILE READING FILE\n");
+		exit(0);
+	}
+	close(fd);
+	return (res);
+}
+
+/*char	*read_whole_file4(char *filename)
+{
+
+}*/
 
 void	read_ways_n_nodes_directly(char *filename, t_node ***nodes, t_way ***ways)
 {
@@ -61,8 +117,10 @@ void	read_ways_n_nodes_directly(char *filename, t_node ***nodes, t_way ***ways)
 	char	*file_content;
 
 	tmp_ways = NULL;
-	file_content = read_whole_file2(filename);
+	file_content = read_whole_file3(filename);
+	ft_printf("File length : %ld\n", ft_strlen(file_content));
 	*nodes = get_nodes_directly(file_content);
+	ft_printf("GOT NODES\n");
 	nb_nodes = get_nb_nodes(*nodes);
 	quicksort((void**)*nodes, compare_nodes);
 	tmp_ways = get_ways_directly(file_content, *nodes, nb_nodes);
@@ -334,7 +392,7 @@ int		main(int argc, char **argv)
 	if (argc > 1)
 	{
 		read_ways_n_nodes_directly(argv[1], &nodes, &ways);
-		//write_ways_to_file(ways, "shapefiles/all_ways5.ways");
+		//write_ways_to_file(ways, "shapefiles/all_ways8.ways");
 		while (1)
 		{
 			start_node = get_node_from_adress(nodes, &start_name);

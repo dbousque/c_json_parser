@@ -609,6 +609,65 @@ t_list	*get_ways_from_inter_nodes(t_list *tmp_ways, t_list *ways_end)
 	return (ori_end->next);
 }
 
+void	free_node(t_node *node)
+{
+	free(node);
+}
+
+t_list	*get_ways_from_inter_nodes_minimal(t_list *tmp_ways, t_list *ways_end)
+{
+	t_way	*tmp_way;
+	int		i;
+	int		start;
+	t_list	*tmp;
+	t_list	*ori_end;
+	t_way	*n_way;
+	//int		x;
+
+	ft_lstaddend(&ways_end, new_list_elt(NULL, 0));
+	ori_end = ways_end;
+	while (tmp_ways != ori_end)
+	{
+		tmp_way = (t_way*)tmp_ways->content;
+		i = 1;
+		start = 0;
+		while (tmp_way->nodes[i])
+		{
+			if (tmp_way->nodes[i]->nb_inter > 1 || !tmp_way->nodes[i + 1])
+			{
+				// multiple ways cross here
+				n_way = new_way(tmp_way->type, tmp_way->oneway, tmp_way->maxspeed, tmp_way->access);
+				if (!(n_way->nodes = (t_node**)malloc(sizeof(t_node*) * 3)))
+					malloc_error();
+				//x = start + 1;
+				//while (x < i)
+				//{
+				//	free_node(tmp_way->nodes[x]);
+				//	x++;
+				//}
+				n_way->nodes[2] = NULL;
+				n_way->nodes[0] = tmp_way->nodes[start];
+				n_way->nodes[1] = tmp_way->nodes[i];
+				n_way->nodes_len = 2;
+				if (!n_way->nodes[0]->tmp_ways)
+					n_way->nodes[0]->tmp_ways = new_list();
+				list_add(n_way->nodes[0]->tmp_ways, (void*)n_way);
+				if (!n_way->nodes[1]->tmp_ways)
+					n_way->nodes[1]->tmp_ways = new_list();
+				list_add(n_way->nodes[1]->tmp_ways, (void*)n_way);
+				ft_lstaddend(&ways_end, new_list_elt(n_way, sizeof(t_way*)));
+				start = i;
+			}
+			i++;
+		}
+		free_way(tmp_way);
+		tmp = tmp_ways;
+		tmp_ways = tmp_ways->next;
+		free(tmp);
+	}
+	return (ori_end->next);
+}
+
 int		get_nb_ways(t_list *ways)
 {
 	int		i;
@@ -646,7 +705,7 @@ t_way	**resolve_ways(t_list *tmp_ways)
 		}
 		ways_list = ways_list->next;
 	}
-	tmp_ways = get_ways_from_inter_nodes(tmp_ways, end_ways);
+	tmp_ways = get_ways_from_inter_nodes_minimal(tmp_ways, end_ways);
 	return (list_to_ways(tmp_ways, get_nb_ways(tmp_ways)));
 }
 
