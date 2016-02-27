@@ -21,3 +21,23 @@ size_t	ft_strlen(const char *s)
 		length++;
 	return (length);
 }
+
+size_t	ft_strlen_bis(const char *s)
+{
+	char	*s_start;
+
+	s_start = (char*)s;
+	while (*s)
+		s++;
+	return ((size_t)(s - s_start));
+}
+
+size_t	ft_strlen_bis2(const char *s)
+{
+	int		i;
+
+	i = 0;
+	while (s[i])
+		i++;
+	return (i);
+}

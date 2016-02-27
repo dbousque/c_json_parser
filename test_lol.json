@@ -1,0 +1,28 @@
+{
+  "version": 0.6,
+  "generator": "Overpass API",
+  "osm3s": {
+    "timestamp_osm_base": "2016-02-01T23:27:02Z",
+    "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+  },
+  "elements": [
+    {
+      "type": "way",
+      "id": 30069638,
+      "nodes": [
+        331203099,
+        3275295279,
+        3275295275,
+        3275295265,
+        3275292758,
+        331203087
+      ],
+      "tags": {
+        "highway": "tertiary",
+        "name": "Rue de la Croix de Chabriant=1}",
+        "oneway": "yes",
+        "ref": "D 67"
+      }
+    }
+  ]
+}

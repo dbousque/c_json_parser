@@ -49,12 +49,48 @@ t_value	*void_value(void)
 	return (res);
 }
 
+void	ft_putendl_n2(char *str, int n)
+{
+	char	ori_char;
+
+	ori_char = str[n];
+	str[n] = '\0';
+	ft_putendl(str);
+	str[n] = ori_char;
+}
+
 void	go_to_next_char(char *buf, int *i, char c)
 {
 	while (buf[*i] && buf[*i] != c)
 		(*i)++;
 	if (!buf[*i])
+	{
+		ft_putendl("ADSFDFDDFDF");
 		wrong_format();
+	}
+}
+
+void	go_to_next_char_not_in_string(char *buf, int *i, char c)
+{
+	int		nb;
+
+	nb = 0;
+	while (buf[*i] && (buf[*i] != c || nb == 1))
+	{
+		if (buf[*i] == '"')
+		{
+			if (nb == 1 && *i > 0 && buf[*i - 1] != '\\')
+				nb = 0;
+			else
+				nb = 1;
+		}
+		(*i)++;
+	}
+	if (!buf[*i])
+	{
+		ft_putendl("TTTTTTTTTTTTTGGGGGGGGGGGGGGAAAAAAAAAAAAAA");
+		wrong_format();
+	}
 }
 
 char	*take_up_to_char(char *buf, int *i, char c, char preceed, int *len)
@@ -178,7 +214,7 @@ t_value	*handle_dict(char *buf, int *i)
 		if (buf[*i] != ',')
 			ret = 0;
 	}
-	go_to_next_char(buf, i, '}');
+	go_to_next_char_not_in_string(buf, i, '}');
 	(*i)++;
 	return (keys_n_values_to_value(keys, values));
 }

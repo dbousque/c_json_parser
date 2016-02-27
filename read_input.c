@@ -110,6 +110,51 @@ t_node	**get_nodes(t_value *json)
 	return (list_to_nodes(nodes, nb));
 }
 
+void	ft_putendl_n(char *str, int n)
+{
+	char	ori_char;
+
+	ori_char = str[n];
+	str[n] = '\0';
+	ft_putendl(str);
+	str[n] = ori_char;
+}
+
+t_node	**get_nodes_directly(char *file_content)
+{
+	t_list	*nodes;
+	t_list	*nodes_end;
+	t_node	*tmp_node;
+	t_value	*elt;
+	int		i;
+	int		nb;
+
+	nodes = NULL;
+	nodes_end = NULL;
+	i = 0;
+	nb = 0;
+	get_to_elts_start(&file_content);
+	while (has_next_elt(file_content))
+	{
+		//ft_putendl(file_content);
+		//ft_putchar('\n');
+		elt = get_elt_from_file(&file_content);
+		// elt is an osm node
+		if (ft_strcmp("node", get_string(get_val(elt, "type"))) == 0)
+		{
+			tmp_node = new_node(get_long(get_val(elt, "id")), get_double(get_val(elt, "lat")), get_double(get_val(elt, "lon")));
+			ft_lstaddend(&nodes_end, new_list_elt(tmp_node, sizeof(t_node)));
+			if (!nodes)
+				nodes = nodes_end;
+			nb++;
+		}
+		free_value(elt);
+		file_content = next_json_start(file_content);
+		i++;
+	}
+	return (list_to_nodes(nodes, nb));
+}
+
 char	get_way_type(char *type)
 {
 	if (ft_strcmp(type, "motorway") == 0)
@@ -140,12 +185,13 @@ char	get_way_type(char *type)
 		return (RESIDENTIAL);
 	if (ft_strcmp(type, "residential_link") == 0)
 		return (RESIDENTIAL_LINK);
-	if (ft_strcmp(type, "service") == 0)
+	if (ft_strcmp(type, "service") == 0 || ft_strcmp(type, "services") == 0)
 		return (SERVICE);
 	if (ft_strcmp(type, "service_link") == 0)
 		return (SERVICE_LINK);
 	if (ft_strcmp(type, "living_street") == 0)
 		return (LIVING_STREET);
+	ft_printf("TYPE NOT CORRECT : %s\n", type);
 	return (0);
 }
 
@@ -185,7 +231,7 @@ char	*get_type_name(char type)
 		return "service_link";
 	else if (type == LIVING_STREET)
 		return "living_street";
-	ft_printf("ERROR\n");
+	ft_printf("ERROR, type not found : %d\n", type);
 	return "ERROR";
 }
 
@@ -262,6 +308,135 @@ int		get_nb_nodes2(t_value **nodes)
 	return (i);
 }
 
+char	has_next_elt(char *file_content)
+{
+	while (*file_content && *file_content != '{' && *file_content != ']')
+		file_content++;
+	if (*file_content == ']' || !(*file_content))
+		return (0);
+	return (1);
+}
+
+t_value	*get_elt_from_file(char **file_content)
+{
+	int		nb;
+	int		i;
+	char	ori_char;
+	t_value	*res;
+	char	in_string;
+
+	in_string = 0;
+	nb = 0;
+	i = 0;
+	while ((*file_content)[i])
+	{
+		if ((*file_content)[i] == '"' && (i == 0 || !in_string || (*file_content)[i - 1] == '\\'))
+			in_string = 1;
+		else if ((*file_content)[i] == '"' && in_string && (i == 0 || (*file_content)[i - 1] != '\\'))
+			in_string = 0;
+		if ((*file_content)[i] == '{' && !in_string)
+			nb++;
+		else if ((*file_content)[i] == '}' && !in_string)
+			nb--;
+		if (nb == 0)
+		{
+			ori_char = (*file_content)[i + 1];
+			(*file_content)[i + 1] = '\0';
+			res = read_json_str(*file_content);
+			(*file_content)[i + 1] = ori_char;
+			(*file_content) = next_json_start(*file_content + i + 1);
+			return (res);
+		}
+		i++;
+	}
+	ft_printf("ERROR, no json elt found");
+	return (NULL);
+}
+
+char	*next_json_start(char *file_content)
+{
+	char	in_string;
+
+	in_string = 0;
+	while (*file_content && (*file_content != '{' || in_string))
+	{
+		if (*file_content == '"' && (!in_string || *(file_content - 1) == '\\'))
+			in_string = 1;
+		else if (*file_content == '"' && in_string && *(file_content - 1) != '\\')
+			in_string = 0;
+		file_content++;
+	}
+	return (file_content);
+}
+
+void	get_to_elts_start(char **file_content)
+{
+	char	ori_char;
+
+	while (**file_content)
+	{
+		ori_char = *((*file_content) + ft_strlen("\"elements\": ["));
+		*((*file_content) + ft_strlen("\"elements\": [")) = '\0';
+		if (ft_strcmp(*file_content, "\"elements\": [") == 0)
+		{
+			*((*file_content) + ft_strlen("\"elements\": [")) = ori_char;
+			*file_content = next_json_start(*file_content);
+			return ;
+		}
+		*((*file_content) + ft_strlen("\"elements\": [")) = ori_char;
+		(*file_content)++;
+	}
+}
+
+t_list	*get_ways_directly(char *file_content, t_node **nodes, int nb_nodes)
+{
+	t_list			*ways;
+	t_list			*ways_end;
+	t_way			*tmp_way;
+	t_value			*elt;
+	t_value			*tags;
+	t_value			**tmp_nodes;
+	int				i;
+	int				x;
+	int				nb;
+
+	ways = NULL;
+	ways_end = NULL;
+	i = 0;
+	nb = 0;
+	get_to_elts_start(&file_content);
+	while (has_next_elt(file_content))
+	{
+		elt = get_elt_from_file(&file_content);
+		if (elt != (void*)DELETED_VALUE)
+		{
+			// elt is an osm way
+			if (ft_strcmp("way", get_string(get_val(elt, "type"))) == 0)
+			{
+				tags = get_val(elt, "tags");
+				tmp_way = new_way(get_way_type(get_string(get_val(tags, "highway"))), is_way_oneway(get_string(get_val(tags, "oneway"))), get_maxspeed(get_string(get_val(tags, "maxspeed"))), get_access(get_string(get_val(tags, "access"))));
+				tmp_nodes = get_tab(get_val(elt, "nodes"));
+				if (!(tmp_way->nodes = (t_node**)malloc(sizeof(t_node*) * (get_nb_nodes2(tmp_nodes) + 1))))
+					malloc_error();
+				x = 0;
+				while (tmp_nodes[x])
+				{
+					tmp_way->nodes[x] = find_node_by_id(nodes, nb_nodes, get_long(tmp_nodes[x]));
+					x++;
+				}
+				tmp_way->nodes[x] = NULL;
+				ft_lstaddend(&ways_end, new_list_elt(tmp_way, sizeof(t_way)));
+				if (!ways)
+					ways = ways_end;
+				nb++;
+			}
+			free_value(elt);
+		}
+		i++;
+	}
+	return (ways);
+}
+
 t_list	*get_ways(t_value *json, t_node **nodes, int nb_nodes)
 {
 	t_list			*ways;
@@ -285,30 +460,18 @@ t_list	*get_ways(t_value *json, t_node **nodes, int nb_nodes)
 		elt = elts[i];
 		if (elt != (void*)DELETED_VALUE)
 		{
-			//print_json(elt);
 			// elt is an osm way
 			if (ft_strcmp("way", get_string(get_val(elt, "type"))) == 0)
 			{
 				tags = get_val(elt, "tags");
 				tmp_way = new_way(get_way_type(get_string(get_val(tags, "highway"))), is_way_oneway(get_string(get_val(tags, "oneway"))), get_maxspeed(get_string(get_val(tags, "maxspeed"))), get_access(get_string(get_val(tags, "access"))));
 				tmp_nodes = get_tab(get_val(elt, "nodes"));
-				//print_json(get_val(elt, "nodes"));
 				if (!(tmp_way->nodes = (t_node**)malloc(sizeof(t_node*) * (get_nb_nodes2(tmp_nodes) + 1))))
 					malloc_error();
 				x = 0;
 				while (tmp_nodes[x])
 				{
 					tmp_way->nodes[x] = find_node_by_id(nodes, nb_nodes, get_long(tmp_nodes[x]));
-					if (!tmp_way->nodes[x])
-					{
-						if (x > 0)
-							printf("%ld\n", get_long(tmp_nodes[x - 1]));
-						else
-							printf("0\n");
-						printf("%ld\n", get_long(tmp_nodes[x]));
-						print_json(get_val(elt, "nodes"));
-						printf("LAAAAAAAAAAAAA\n");
-					}
 					x++;
 				}
 				tmp_way->nodes[x] = NULL;

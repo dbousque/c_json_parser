@@ -54,6 +54,24 @@ char	*read_whole_file2(char *filename)
 	return (res);
 }
 
+void	read_ways_n_nodes_directly(char *filename, t_node ***nodes, t_way ***ways)
+{
+	int		nb_nodes;
+	t_list	*tmp_ways;
+	char	*file_content;
+
+	tmp_ways = NULL;
+	file_content = read_whole_file2(filename);
+	*nodes = get_nodes_directly(file_content);
+	nb_nodes = get_nb_nodes(*nodes);
+	quicksort((void**)*nodes, compare_nodes);
+	tmp_ways = get_ways_directly(file_content, *nodes, nb_nodes);
+	free(file_content);
+	*ways = resolve_ways(tmp_ways);
+	(void)ways;
+	validate_nodes(*nodes);
+}
+
 char  *make_request(char *url)
 {
 	char	*command;
@@ -123,9 +141,8 @@ t_node	*find_closest_node(t_node **nodes, double lon, double lat)
 	return (closest);
 }
 
-t_node	*get_node_from_adress(t_node **nodes)
+t_node	*get_node_from_adress(t_node **nodes, char **adress_name)
 {
-	char	*adress;
 	char	*url;
 	char	*json_content;
 	t_value	*json;
@@ -133,13 +150,14 @@ t_node	*get_node_from_adress(t_node **nodes)
 	double	lat;
 
 	ft_putstr("Enter an adress : ");
-	get_next_line(1, &adress);
-	replace_char(adress, ' ', '+');
-	url = ft_strjoin(ft_strjoin("\"http://nominatim.openstreetmap.org/search?q=", adress), "&polygon=1&addressdetails=1&format=json\"");
+	get_next_line(1, adress_name);
+	replace_char(*adress_name, ' ', '+');
+	url = ft_strjoin(ft_strjoin("\"http://nominatim.openstreetmap.org/search?q=", *adress_name), "&polygon=1&addressdetails=1&format=json\"");
 	json_content = make_request(url);
 	json = read_json_str(json_content);
 	lon = ft_atod(get_string(get_val(get_tab(json)[0], "lon")));
 	lat = ft_atod(get_string(get_val(get_tab(json)[0], "lat")));
+	replace_char(*adress_name, '+', ' ');
 	return (find_closest_node(nodes, lon, lat));
 }
 
@@ -151,7 +169,7 @@ t_node2	*new_searchnode(t_node2 *from_node, t_node *to_node, t_node *end_node)
 		malloc_error();
 	res->last_node = to_node;
 	res->distance_from_start = from_node->distance_from_start + get_distance_node(from_node->last_node, to_node);
-	res->priority = (-res->distance_from_start + get_distance_node(to_node, end_node));
+	res->priority = -(res->distance_from_start + get_distance_node(to_node, end_node));
 	res->previous_node = from_node->last_node;
 	return (res);
 }
@@ -169,7 +187,7 @@ t_node2	*new_searchnode_void(t_node *start, t_node *end, t_node *end_node)
 		malloc_error();
 	res->last_node = end;
 	res->distance_from_start = get_distance_node(start, end);
-	res->priority = (-res->distance_from_start + get_distance_node(end, end_node));
+	res->priority = -(res->distance_from_start + get_distance_node(end, end_node));
 	res->previous_node = start;
 	return (res);
 }
@@ -194,13 +212,14 @@ void	add_start_nodes(t_tree *tree, t_node *start_node, t_node *end_node)
 	}
 }
 
-void	print_best_way(t_node *start_node, t_node *end_node, clock_t start_time)
+void	print_best_way(t_node *start_node, t_node *end_node, clock_t start_time, char *start_name, char *end_name)
 {
 	t_node			*closest_to_start;
 	t_way			*best_way;
 	t_node 			*current;
 	int				i;
 	t_linked_list	*ways;
+	char			*filename;
 
 	ways = new_list();
 	current = end_node;
@@ -209,8 +228,11 @@ void	print_best_way(t_node *start_node, t_node *end_node, clock_t start_time)
 		i = 0;
 		best_way = NULL;
 		closest_to_start = NULL;
+		//print_node(current);
+		//print_node(current->previous_node);
 		while (current->ways[i])
 		{
+			//print_way(current->ways[i]);
 			if (way_end(current->ways[i], current) == current->previous_node)
 			{
 				best_way = current->ways[i];
@@ -219,6 +241,7 @@ void	print_best_way(t_node *start_node, t_node *end_node, clock_t start_time)
 			}
 			i++;
 		}
+		//ft_printf("node end : %d, %d\n", current->nb_inter, i);
 		if (!best_way || !closest_to_start)
 			ft_printf("EEERRRORRR\n");
 		list_add(ways, (void*)best_way);
@@ -227,7 +250,10 @@ void	print_best_way(t_node *start_node, t_node *end_node, clock_t start_time)
 		current = closest_to_start;
 	}
 	ft_printf("Found best way in %.3f seconds !\nDistance : %.1fkm\n", (float)(clock() - start_time) / CLOCKS_PER_SEC, end_node->distance_from_start);
-	write_ways_to_file((t_way**)list_to_array(ways), "shapefiles/test_chemin8.ways");
+	replace_char(start_name, ' ', '_');
+	replace_char(end_name, ' ', '_');
+	filename = ft_strjoin(ft_strjoin(ft_strjoin(ft_strjoin("shapefiles/", start_name), "__"), end_name), ".ways");
+	write_ways_to_file((t_way**)list_to_array(ways), filename);
 }
 
 void	free_searchnode(t_node2 *node)
@@ -240,16 +266,18 @@ void	find_best_way(t_node *start_node, t_node *end_node)
 	t_tree	*tree;
 	t_node2	*top_node;
 	int		i;
-	clock_t	start_time;
 	int		nb_nodes;
+	int		tours;
 
+	tours = 1;
 	nb_nodes = 0;
-	start_time = clock();
 	tree = ft_empty_tree();
 	add_start_nodes(tree, start_node, end_node);
 	while (!is_tree_empty(tree))
 	{
 		top_node = pop(tree);
+		if (tours % 1000 == 0)
+			ft_printf("nb nodes : %d\n", tree->last);
 		if (tree->last > nb_nodes)
 			nb_nodes = tree->last;
 		if (top_node->last_node->distance_from_start != -1.0)
@@ -260,8 +288,8 @@ void	find_best_way(t_node *start_node, t_node *end_node)
 			top_node->last_node->previous_node = top_node->previous_node;
 			if (top_node->last_node == end_node)
 			{
+				free_searchnode(top_node);
 				ft_printf("highest number of nodes : %d\n", nb_nodes);
-				print_best_way(start_node, end_node, start_time);
 				return ;
 			}
 			i = 0;
@@ -271,7 +299,23 @@ void	find_best_way(t_node *start_node, t_node *end_node)
 					ft_add_to_tree2(tree, new_searchnode(top_node, way_end(top_node->last_node->ways[i], top_node->last_node), end_node));
 				i++;
 			}
+			free_searchnode(top_node);
 		}
+		tours++;
+	}
+	ft_printf("NOT FOUND.\n");
+}
+
+void	clean_nodes(t_node **nodes)
+{
+	int		i;
+
+	i = 0;
+	while (nodes[i])
+	{
+		nodes[i]->distance_from_start = -1.0;
+		nodes[i]->previous_node = NULL;
+		i++;
 	}
 }
 
@@ -281,18 +325,29 @@ int		main(int argc, char **argv)
 	t_way	**ways;
 	t_node	*start_node;
 	t_node	*end_node;
+	clock_t	start_time;
+	char	*start_name;
+	char	*end_name;
 
 	nodes = NULL;
 	ways = NULL;
 	if (argc > 1)
 	{
-		read_ways_n_nodes(argv[1], &nodes, &ways);
-		write_ways_to_file(ways, "shapefiles/all_ways3.ways");
-		start_node = get_node_from_adress(nodes);
-		end_node = get_node_from_adress(nodes);
-		(void)start_node;
-		(void)end_node;
-		find_best_way(start_node, end_node);
+		read_ways_n_nodes_directly(argv[1], &nodes, &ways);
+		//write_ways_to_file(ways, "shapefiles/all_ways5.ways");
+		while (1)
+		{
+			start_node = get_node_from_adress(nodes, &start_name);
+			end_node = get_node_from_adress(nodes, &end_name);
+			//(void)start_node;
+			//(void)end_node;
+			//start_node = find_closest_node(nodes, 2.353337, 48.890366);
+			//end_node = find_closest_node(nodes, 2.256107, 48.841455);
+			start_time = clock();
+			find_best_way(start_node, end_node);
+			print_best_way(start_node, end_node, start_time, start_name, end_name);
+			clean_nodes(nodes);
+		}
 	}
 	return (0);
 }

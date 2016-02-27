@@ -73,6 +73,7 @@ t_node				*find_node_by_id(t_node **nodes, int nb_nodes, long id);
 t_node				**get_nodes(t_value *json);
 int					get_nb_nodes(t_node **nodes);
 t_list				*get_ways(t_value *json, t_node **nodes, int nb_nodes);
+t_list				*get_ways_directly(char *file_content, t_node **nodes, int nb_nodes);
 t_way				**resolve_ways(t_list *tmp_ways);
 void				validate_nodes(t_node **nodes);
 char				*get_type_name(char type);
@@ -85,5 +86,12 @@ t_node2				*ft_swap(t_tree *tree, int *ind, int ind2, t_node2 *tmp);
 char				is_tree_empty(t_tree *tree);
 int					ft_right_place(int *ind, t_tree *tree);
 int					ft_first_higher(t_tree *tree, int ind1, int ind2);
+void				print_way(t_way *way);
+void				print_node(t_node *node);
+t_value				*get_elt_from_file(char **file_content);
+char				has_next_elt(char *file_content);
+char				*next_json_start(char *file_content);
+void				get_to_elts_start(char **file_content);
+t_node				**get_nodes_directly(char *file_content);
 
 #endif
